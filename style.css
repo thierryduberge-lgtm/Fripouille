@@ -1,0 +1,52 @@
+
+        :root { --primary: #ff7f50; --bg: #fdf6f0; }
+        body { font-family: sans-serif; background: var(--bg); margin: 0; padding: 20px; color: #333; }
+        .container { max-width: 500px; margin: auto; background: white; padding: 20px; border-radius: 20px; shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        h2 { text-align: center; color: var(--primary); }
+        
+        /* Formulaire */
+        .form-group { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
+        input { flex: 1; padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 16px; }
+        button { background: green; color: white; border: none; padding: 12px 20px; border-radius: 8px; cursor: pointer; font-weight: bold; width: 100%; }
+        
+        /* Tableau */
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 14px; }
+        th { background: #eee; padding: 10px; text-align: left; }
+        td { padding: 10px; border-bottom: 1px solid #eee; }
+        
+        /* Graphique */
+        .chart-container { margin-top: 30px; position: relative; height: 250px; }
+
+
+        /* Styles de base pour le bouton */
+        #btn-ajouter {
+            background-color: #4CAF50; /* Vert par défaut */
+            color: white;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            width: 100%;
+            transition: background-color 0.3s; /* Transition douce */
+        }
+
+        /* Changement de background au clic (pression du doigt) */
+        #btn-ajouter:active {
+            background-color: #388E3C; /* Vert plus foncé au moment du clic */
+        }
+
+        /* Le bouton "Effacer tout" reste en rouge discret */
+        .btn-danger {
+            background-color: #ff4444;
+            opacity: 0.6;
+            margin-top: 20px;
+            font-size: 10px;
+        }
+        
+        .btn-danger:active {
+            background-color: #cc0000;
+            opacity: 1;
+        }
+        
+      
