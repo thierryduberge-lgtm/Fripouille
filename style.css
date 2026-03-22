@@ -1,0 +1,122 @@
+/* 1. VARIABLES ET BASES (On définit les couleurs et le comportement global) */
+:root { 
+    --primary: #4CAF50; /* Le vert que tu as choisi */
+    --bg: #fdf6f0; 
+}
+
+html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    overflow: hidden; /* Évite les barres de défilement inutiles sur les bords */
+    font-family: sans-serif;
+    background-color: var(--bg);
+    color: #333;
+}
+
+.container {
+    height: 100vh;
+    width: 100vw;
+    display: flex;
+    flex-direction: column;
+    background: white;
+    margin: 0;
+    padding: env(safe-area-inset-top) 0 env(safe-area-inset-bottom) 0; /* Évite l'encoche iPhone */
+    box-sizing: border-box;
+}
+
+/* 2. STRUCTURE PLEIN ÉCRAN (L'enveloppe de ton appli) */
+.container {
+    height: 100vh; /* Toute la hauteur de l'écran */
+    display: flex;
+    flex-direction: column;
+    background: white;
+    max-width: none; /* Occupe toute la largeur */
+    margin: 0;
+    box-sizing: border-box; /* Pour que le padding ne dépasse pas */
+}
+
+/* 3. CONTENU SCROLLABLE (La partie qui bouge sous le titre) */
+main {
+    flex: 1;
+    overflow-y: auto; /* Permet de scroller le tableau et le graphique */
+    padding: 20px;
+    -webkit-overflow-scrolling: touch; /* Rendu fluide sur iPhone */
+}
+
+h2 { 
+    text-align: center; 
+    color: var(--primary);
+    margin-top: 10px;
+}
+
+/* 4. FORMULAIRE ET ENTRÉES */
+.form-group { 
+    display: flex; 
+    gap: 10px; 
+    margin-bottom: 20px; 
+    flex-wrap: wrap; 
+}
+
+input { 
+    flex: 1; 
+    padding: 12px; 
+    border: 1px solid #ddd; 
+    border-radius: 8px; 
+    font-size: 16px; 
+}
+
+/* 5. BOUTONS ET INTERACTIONS */
+button { 
+    border: none; 
+    border-radius: 8px; 
+    cursor: pointer; 
+    font-weight: bold; 
+    transition: background-color 0.3s, opacity 0.3s;
+}
+
+#btn-ajouter {
+    background-color: var(--primary);
+    color: white;
+    padding: 15px 20px; /* Un peu plus grand pour le pouce */
+    width: 100%;
+    font-size: 16px;
+}
+
+#btn-ajouter:active {
+    background-color: #388E3C; /* Vert foncé au clic */
+    transform: scale(0.98); /* Petit effet d'appui */
+}
+
+.btn-danger {
+    background-color: #ff4444;
+    color: white;
+    opacity: 0.6;
+    margin-top: 20px;
+    padding: 8px;
+    font-size: 11px;
+    width: 100%;
+}
+
+.btn-danger:active {
+    background-color: #cc0000;
+    opacity: 1;
+}
+
+/* 6. TABLEAU ET GRAPHIQUE */
+table { 
+    width: 100%; 
+    border-collapse: collapse; 
+    margin-top: 20px; 
+    font-size: 14px; 
+}
+
+th { background: #f8f8f8; padding: 10px; text-align: left; border-bottom: 2px solid #eee; }
+td { padding: 10px; border-bottom: 1px solid #eee; }
+
+.chart-container { 
+    margin-top: 20px; 
+    position: relative; 
+    height: 250px; 
+    width: 100%;
+}
