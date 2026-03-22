@@ -1,67 +1,71 @@
+const input = document.getElementById('inputTache');
+const btnAjouter = document.getElementById('btnAjouter');
+const liste = document.getElementById('listeTaches');
+const compteur = document.getElementById('compteur');
 
+function sauvegarder(taches) {
+  localStorage.setItem('taches', JSON.stringify(taches));
+}
 
-    let data = JSON.parse(localStorage.getItem('catWeights')) || [];
-    let chart;
+function charger() {
+  const data = localStorage.getItem('taches');
+  return data ? JSON.parse(data) : [];
+}
 
-    // Initialisation au chargement
-    window.onload = () => {
-        document.getElementById('dateInput').valueAsDate = new Date();
-        updateUI();
-    };
+function mettreAJourCompteur(taches) {
+  const restantes = taches.filter(t => !t.terminee).length;
+  compteur.textContent = restantes + ' tâche(s) restante(s)';
+}
 
-    function addData() {
-        const date = document.getElementById('dateInput').value;
-        const weight = document.getElementById('weightInput').value;
+function afficher() {
+  const taches = charger();
+  liste.innerHTML = '';
 
-        if(!date || !weight) return alert("Remplis tout !");
+  taches.forEach((tache, index) => {
+    const li = document.createElement('li');
+    if (tache.terminee) li.classList.add('terminee');
 
-        data.push({ date, weight: parseFloat(weight) });
-        data.sort((a, b) => new Date(a.date) - new Date(b.date)); // Trie par date
-        
-        saveAndUpdate();
-        document.getElementById('weightInput').value = "";
-    }
+    const cercle = document.createElement('div');
+    cercle.classList.add('cercle');
+    cercle.addEventListener('click', () => {
+      taches[index].terminee = !taches[index].terminee;
+      sauvegarder(taches);
+      afficher();
+    });
 
-    function deleteRow(index) {
-        data.splice(index, 1);
-        saveAndUpdate();
-    }
+    const span = document.createElement('span');
+    span.textContent = tache.texte;
 
-    function saveAndUpdate() {
-        localStorage.setItem('catWeights', JSON.stringify(data));
-        updateUI();
-    }
+    const btn = document.createElement('button');
+    btn.textContent = '✕';
+    btn.addEventListener('click', () => {
+      taches.splice(index, 1);
+      sauvegarder(taches);
+      afficher();
+    });
 
-    function updateUI() {
-        // Mise à jour du tableau
-        const tbody = document.getElementById('tableBody');
-        tbody.innerHTML = data.map((item, index) => `
-            <tr>
-                <td>${item.date}</td>
-                <td>${item.weight} kg</td>
-                <td><button onclick="deleteRow(${index})" style="padding:5px; background:grey;">X</button></td>
-            </tr>
-        `).join('');
+    li.appendChild(cercle);
+    li.appendChild(span);
+    li.appendChild(btn);
+    liste.appendChild(li);
+  });
 
-        // Mise à jour du graphique
-        const ctx = document.getElementById('weightChart').getContext('2d');
-        if (chart) chart.destroy();
-        
-        chart = new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: data.map(d => d.date),
-                datasets: [{
-                    label: 'Poids (kg)',
-                    data: data.map(d => d.weight),
-                    borderColor: '#ff7f50',
-                    backgroundColor: 'rgba(255, 127, 80, 0.2)',
-                    fill: true,
-                    tension: 0.3
-                }]
-            },
-            options: { responsive: true, maintainAspectRatio: false }
-        });
-    }
+  mettreAJourCompteur(taches);
+}
 
-    function clearData() { if(confirm("Tout supprimer ?")) { data = []; saveAndUpdate(); } }
+btnAjouter.addEventListener('click', () => {
+  const texte = input.value.trim();
+  if (texte === '') return;
+
+  const taches = charger();
+  taches.push({ texte: texte, terminee: false });
+  sauvegarder(taches);
+  input.value = '';
+  afficher();
+});
+
+input.addEventListener('keypress', (e) => {
+  if (e.key === 'Enter') btnAjouter.click();
+});
+
+afficher();

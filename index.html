@@ -1,54 +1,28 @@
-
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fripouille 🐈</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <link rel="stylesheet" href="style.css">
-    <script src="app.js"></script>
-    <link rel="apple-touch-icon" href="https://img.icons8.com/fluency/180/cat.png">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ma Todo List</title>
 
-    <link rel="icon" type="image/png" sizes="192x192" href="https://img.icons8.com/fluency/192/cat.png">
-
-    <meta name="theme-color" content="#4CAF50">
-
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="stylesheet" href="style.css" />
+  <link rel="manifest" href="manifest.json">
 </head>
 <body>
 
-<div class="container">
-    <h2>Fripouille 🐾</h2>
+  <div class="container">
+    <h1>Ma Todo List</h1>
 
-    <div class="form-group">
-        <input type="date" id="dateInput">
-        <input type="number" id="weightInput" step="0.1" placeholder="Poids (kg)">
-        <button id="btn-ajouter" onclick="addData()">Ajouter le poids</button>
+    <div class="input-zone">
+      <input type="text" id="inputTache" placeholder="Ajouter une tâche..." />
+      <button id="btnAjouter">+</button>
     </div>
 
-    <div class="chart-container">
-        <canvas id="weightChart"></canvas>
-    </div>
+    <ul id="listeTaches"></ul>
 
-    <table>
-        <thead>
-            <tr>
-                <th>Date</th>
-                <th>Poids (kg)</th>
-                <th>Action</th>
-            </tr>
-        </thead>
-        <tbody id="tableBody"></tbody>
-    </table>
+    <p id="compteur"></p>
+  </div>
 
-    <div class="button_bas">
-      <button class="btn-danger" onclick="clearData()">Effacer tout</button>
-    </div>
-</div>
-
-
-
+  <script src="app.js"></script>
 </body>
 </html>
