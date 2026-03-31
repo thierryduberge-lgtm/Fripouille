@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>Fripouille 🐈</title>
+    <link rel="manifest" href="manifest.json">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <style>
+        :root { --primary: #4CAF50; --bg: #fdf6f0; --danger: #e53e3e; }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        
+        body { 
+            margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; 
+            background: var(--bg); color: #333; height: 100vh; display: flex; flex-direction: column;
+        }
+
+        .container { 
+            height: 100%; display: flex; flex-direction: column; 
+            padding: env(safe-area-inset-top) 15px env(safe-area-inset-bottom) 15px; 
+        }
+
+        h2 { text-align: center; color: var(--primary); margin: 15px 0; font-size: 1.5rem; }
+
+        .form-group { 
+            background: white; padding: 15px; border-radius: 12px; 
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05); margin-bottom: 15px;
+        }
+
+        input { 
+            width: 100%; padding: 12px; margin-bottom: 10px; border: 1px solid #ddd; 
+            border-radius: 8px; font-size: 16px; outline: none;
+        }
+
+        #btn-ajouter { 
+            background: var(--primary); color: white; border: none; padding: 14px; 
+            border-radius: 8px; font-weight: bold; width: 100%; font-size: 16px; 
+        }
+
+        .chart-container { 
+            background: white; padding: 10px; border-radius: 12px; 
+            height: 250px; margin-bottom: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+
+        .table-wrapper { flex: 1; overflow-y: auto; background: white; border-radius: 12px; margin-bottom: 15px; }
+        
+        table { width: 100%; border-collapse: collapse; font-size: 14px; }
+        th { position: sticky; top: 0; background: #f8f8f8; padding: 12px; text-align: left; border-bottom: 2px solid #eee; }
+        td { padding: 12px; border-bottom: 1px solid #eee; }
+
+        .btn-danger { 
+            background: none; color: var(--danger); border: 1px solid var(--danger);
+            padding: 8px; border-radius: 6px; font-size: 12px; cursor: pointer; margin-bottom: 20px;
+        }
+
+        #status { text-align: center; font-size: 12px; color: #888; margin-bottom: 5px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Fripouille 🐾</h2>
+
+    <div class="form-group">
+        <input type="date" id="dateInput">
+        <input type="number" id="weightInput" step="0.01" placeholder="Poids (kg)">
+        <button id="btn-ajouter">Ajouter le poids</button>
+    </div>
+
+    <div id="status">Connexion au Cloud...</div>
+
+    <div class="chart-container">
+        <canvas id="weightChart"></canvas>
+    </div>
+
+    <div class="table-wrapper">
+        <table>
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Poids</th>
+                </tr>
+            </thead>
+            <tbody id="tableBody"></tbody>
+        </table>
+    </div>
+
+    <button class="btn-danger" id="btn-clear">Effacer tout l'historique</button>
+</div>
+
+<script type="module">
+    // --- FIREBASE CONFIGURATION ---
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyB58xGUe083kQQ0EywZ42CEdEfpW-wrb6M",
+        authDomain: "fripouille-app.firebaseapp.com",
+        projectId: "fripouille-app",
+        storageBucket: "fripouille-app.firebasestorage.app",
+        messagingSenderId: "728685205051",
+        appId: "1:728685205051:web:33886b985f08e6cc356e1e",
+        measurementId: "G-H7LW242PGN"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const docRef = doc(db, "chats", "fripouille");
+
+    let myChart;
+    let historique = [];
+
+    // Initialiser la date du jour par défaut
+    document.getElementById('dateInput').valueAsDate = new Date();
+
+    // --- FONCTIONS ---
+    async function chargerDonnees() {
+        try {
+            const docSnap = await getDoc(docRef);
+            if (docSnap.exists()) {
+                historique = docSnap.data().historique || [];
+            }
+            document.getElementById('status').textContent = "Données synchronisées ✅";
+            majInterface();
+        } catch (e) {
+            document.getElementById('status').textContent = "Mode hors-ligne ⚠️";
+        }
+    }
+
+    async function ajouterPoids() {
+        const inputPoids = document.getElementById('weightInput');
+        const inputDate = document.getElementById('dateInput');
+        const poids = parseFloat(inputPoids.value);
+        
+        if (isNaN(poids)) return;
+
+        // Formater la date pour l'affichage (JJ/MM/AAAA)
+        const dateParts = inputDate.value.split('-');
+        const dateAffichee = `${dateParts[2]}/${dateParts[1]}/${dateParts[0]}`;
+
+        historique.push({ date: dateAffichee, poids: poids, rawDate: inputDate.value });
+        
+        // Trier par date
+        historique.sort((a, b) => new Date(a.rawDate) - new Date(b.rawDate));
+
+        try {
+            await setDoc(docRef, { historique: historique });
+            inputPoids.value = '';
+            majInterface();
+        } catch (e) {
+            alert("Erreur de sauvegarde Cloud");
+        }
+    }
+
+    async function effacerTout() {
+        if(confirm("Voulez-vous vraiment effacer tout l'historique de Fripouille ?")) {
+            historique = [];
+            await setDoc(docRef, { historique: [] });
+            majInterface();
+        }
+    }
+
+    function majInterface() {
+        const tbody = document.getElementById('tableBody');
+        tbody.innerHTML = '';
+        
+        historique.slice().reverse().forEach(entree => {
+            const row = `<tr><td>${entree.date}</td><td>${entree.poids} kg</td></tr>`;
+            tbody.innerHTML += row;
+        });
+
+        const labels = historique.map(e => e.date);
+        const data = historique.map(e => e.poids);
+
+        if (myChart) myChart.destroy();
+        const ctx = document.getElementById('weightChart').getContext('2d');
+        myChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Poids (kg)',
+                    data: data,
+                    borderColor: '#4CAF50',
+                    backgroundColor: 'rgba(76, 175, 80, 0.1)',
+                    fill: true,
+                    tension: 0.3
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: { y: { beginAtZero: false } }
+            }
+        });
+    }
+
+    // --- EVENTS ---
+    document.getElementById('btn-ajouter').onclick = ajouterPoids;
+    document.getElementById('btn-clear').onclick = effacerTout;
+    
+    chargerDonnees();
+</script>
+
+</body>
+</html>
